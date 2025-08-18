@@ -20,16 +20,16 @@
 		<Authors>author</Authors>
 		<Copyright>Copyright © author and contributors</Copyright>
 		<IsPackable>True</IsPackable>
-		<PackageProjectUrl>https://github.com/jfversluis/Plugin.Maui.Feature</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/jfversluis/Plugin.Maui.Feature</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/jfversluis/Plugin.Maui.NativeContextMenus</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/jfversluis/Plugin.Maui.NativeContextMenus</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageTags>dotnet-maui;maui;plugin;</PackageTags>
+		<PackageTags>dotnet-maui;maui;plugin;context-menu;native;</PackageTags>
 		<IncludeSymbols>True</IncludeSymbols>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<Title>.NET MAUI Feature Plugin</Title>
-		<Description>Plugin.Maui.Feature provides the ability to do this amazing thing in your .NET MAUI application.</Description>
+		<Title>.NET MAUI Native Context Menus Plugin</Title>
+		<Description>Plugin.Maui.NativeContextMenus provides the ability to create native context menus in your .NET MAUI application.</Description>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<DebugType>portable</DebugType>
