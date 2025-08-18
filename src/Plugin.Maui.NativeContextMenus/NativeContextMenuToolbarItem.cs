@@ -28,20 +28,16 @@ namespace Plugin.Maui.NativeContextMenus
             set => SetValue(ItemsSourceProperty, value);
         }
 
-        public static readonly BindableProperty ItemTappedCommandProperty =
-            BindableProperty.Create(nameof(ItemTappedCommand), typeof(ICommand), typeof(NativeContextMenuToolbarItem));
-
-        public ICommand? ItemTappedCommand
-        {
-            get => (ICommand?)GetValue(ItemTappedCommandProperty);
-            set => SetValue(ItemTappedCommandProperty, value);
-        }
+        // Remove ItemTappedCommand - use inherited Command instead
+        // The inherited Command serves as:
+        // 1. Fallback action when menu can't be shown (iOS 13)
+        // 2. Default action when no menu items exist
+        // 3. For platforms that don't support menus
 
         public event EventHandler<MenuNode>? ItemTapped;
         internal void RaiseItemTapped(MenuNode n)
         {
             ItemTapped?.Invoke(this, n);
-            ItemTappedCommand?.Execute(n.CommandParameter ?? n);
         }
 
         internal Action? RequestRebuildHook;

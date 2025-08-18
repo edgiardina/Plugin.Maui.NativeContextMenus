@@ -1,8 +1,112 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:Plugin.Maui.NativeContextMenus;assembly=Plugin.Maui.NativeContextMenus"
              x:Class="Plugin.Maui.Feature.Sample.MainPage"
-             Title="Feature Plugin">
+             Title="Native Context Menus Sample">
 
-    <!-- Add something that makes sense for your plugin here -->
+    <ContentPage.ToolbarItems>
+
+        <!-- Inline XAML Menu Example -->
+        <local:NativeContextMenuToolbarItem Text="Actions"
+                                            Command="{Binding HandleMenuCommand}">
+            
+            <!-- Simple refresh action -->
+            <local:MenuNode Title="Refresh" Command="{Binding RefreshCommand}" />
+            
+            <!-- View mode radio group -->
+            <local:MenuNode Title="View Mode">
+                <local:MenuNode Title="List" GroupKey="view" IsCheckable="True" IsChecked="True" 
+                               Command="{Binding SetViewCommand}" CommandParameter="List" />
+                <local:MenuNode Title="Grid" GroupKey="view" IsCheckable="True" 
+                               Command="{Binding SetViewCommand}" CommandParameter="Grid" />
+                <local:MenuNode Title="Card" GroupKey="view" IsCheckable="True" 
+                               Command="{Binding SetViewCommand}" CommandParameter="Card" />
+            </local:MenuNode>
+            
+            <!-- Simple action -->
+            <local:MenuNode Title="Add Item" Command="{Binding AddItemCommand}" />
+            
+            <!-- Destructive action -->
+            <local:MenuNode Title="Clear All" Destructive="True" Command="{Binding ClearCommand}" />
+            
+        </local:NativeContextMenuToolbarItem>
+        
+        <!-- MVVM Binding Menu Example -->
+        <local:NativeContextMenuToolbarItem Text="Filters"
+                                           ItemsSource="{Binding MenuItems}"
+                                           Command="{Binding ApplyFilterCommand}" />
+        
+    </ContentPage.ToolbarItems>
+
+    <ScrollView Padding="20">
+        <StackLayout Spacing="20">
+            
+            <!-- Header -->
+            <Label Text="Native Context Menus Demo" 
+                   FontSize="24" 
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+            
+            <Label Text="This sample demonstrates both inline XAML and MVVM binding approaches for native toolbar context menus."
+                   FontSize="14"
+                   TextColor="Gray"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center" />
+            
+            <!-- Status Section -->
+            <Frame BackgroundColor="LightBlue" Padding="15">
+                <StackLayout Spacing="10">
+                    <Label Text="Current Status" FontAttributes="Bold" />
+                    <Label Text="{Binding StatusText}" FontSize="16" />
+                </StackLayout>
+            </Frame>
+            
+            <!-- Current Settings -->
+            <Frame BackgroundColor="LightGreen" Padding="15">
+                <StackLayout Spacing="10">
+                    <Label Text="Current Settings" FontAttributes="Bold" />
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="5">
+                        
+                        <Label Grid.Row="0" Grid.Column="0" Text="View Mode:" FontAttributes="Bold" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding CurrentViewMode}" />
+                        
+                        <Label Grid.Row="1" Grid.Column="0" Text="Sort Mode:" FontAttributes="Bold" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding CurrentSortMode}" />
+                        
+                        <Label Grid.Row="2" Grid.Column="0" Text="Item Count:" FontAttributes="Bold" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding ItemCount}" />
+                        
+                    </Grid>
+                </StackLayout>
+            </Frame>
+            
+            <!-- Instructions -->
+            <Frame BackgroundColor="LightYellow" Padding="15">
+                <StackLayout Spacing="10">
+                    <Label Text="Instructions" FontAttributes="Bold" />
+                    <Label Text="• Tap the 'Actions' toolbar button to see inline XAML menu" />
+                    <Label Text="• Tap the 'Filters' toolbar button to see MVVM binding menu" />
+                    <Label Text="• Try the radio groups (View Mode, Sort By, Filters)" />
+                    <Label Text="• Notice instant-apply behavior - no 'Apply' button needed" />
+                    <Label Text="• Watch the status updates when you interact with menus" />
+                    <Label Text="• On iOS 13/Android without menu support, Command is used as fallback" />
+                </StackLayout>
+            </Frame>
+            
+            <!-- Platform Notes -->
+            <Frame BackgroundColor="LightCoral" Padding="15">
+                <StackLayout Spacing="10">
+                    <Label Text="Platform Notes" FontAttributes="Bold" />
+                    <Label Text="• iOS 14+: Full UIMenu support with checkmarks" />
+                    <Label Text="• iOS 13: Falls back to Command property (first action behavior)" />
+                    <Label Text="• Android: Toolbar overflow menu with SubMenu support" />
+                    <Label Text="• macOS: Same as iOS with UIMenu" />
+                    <Label Text="• Command property: Used as fallback when menu can't be shown" />
+                </StackLayout>
+            </Frame>
+            
+        </StackLayout>
+    </ScrollView>
+
 </ContentPage>

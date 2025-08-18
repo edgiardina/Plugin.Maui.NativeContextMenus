@@ -12,10 +12,10 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 
 		<!-- Display name -->
-		<ApplicationTitle>Plugin.Maui.Feature.Sample</ApplicationTitle>
+		<ApplicationTitle>Plugin.Maui.NativeContextMenus.Sample</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.pluginsample</ApplicationId>
+		<ApplicationId>com.companyname.nativecontextmenussample</ApplicationId>
 		<ApplicationIdGuid>A20E30BB-3BF7-4ACB-89F2-596834136909</ApplicationIdGuid>
 
 		<!-- Versions -->
@@ -48,7 +48,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\src\Plugin.Maui.Feature\Plugin.Maui.Feature.csproj" />
+	  <ProjectReference Include="..\..\src\Plugin.Maui.NativeContextMenus\Plugin.Maui.NativeContextMenus.csproj" />
 	  <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 	</ItemGroup>
 </Project>
