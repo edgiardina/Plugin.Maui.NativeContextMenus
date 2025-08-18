@@ -4,11 +4,13 @@ namespace Plugin.Maui.NativeContextMenus;
 
 /// <summary>
 /// Extension methods for registering the Native Context Menus plugin with MauiAppBuilder
+/// Note: Windows is not supported - use built-in .NET MAUI context menus instead
 /// </summary>
 public static class MauiAppBuilderExtensions
 {
 	/// <summary>
 	/// Configures the Native Context Menus plugin for the MAUI application
+	/// Supports Android, iOS, and macOS platforms
 	/// </summary>
 	/// <param name="builder">The MauiAppBuilder instance</param>
 	/// <returns>The MauiAppBuilder instance for method chaining</returns>

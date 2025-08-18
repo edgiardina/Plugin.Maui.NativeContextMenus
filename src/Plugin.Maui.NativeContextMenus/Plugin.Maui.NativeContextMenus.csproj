@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst;net9.0</TargetFrameworks>
-   		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
+		<!-- Windows is not supported - use built-in .NET MAUI context menu support instead -->
+		<!-- See: https://learn.microsoft.com/en-us/dotnet/maui/user-interface/context-menu?view=net-maui-9.0 -->
+		
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->
 		<SingleProject>true</SingleProject>
@@ -12,16 +14,14 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 
 		<!-- NuGet -->
-		<Authors>author</Authors>
-		<Copyright>Copyright © author and contributors</Copyright>
+		<Authors>Ed Giardina</Authors>
+		<Copyright>Copyright © 2025 Ed Giardina</Copyright>
 		<IsPackable>True</IsPackable>
-		<PackageProjectUrl>https://github.com/jfversluis/Plugin.Maui.NativeContextMenus</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/jfversluis/Plugin.Maui.NativeContextMenus</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/edgiardina/Plugin.Maui.NativeContextMenus</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/edgiardina/Plugin.Maui.NativeContextMenus</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>dotnet-maui;maui;plugin;context-menu;native;</PackageTags>
 		<IncludeSymbols>True</IncludeSymbols>
@@ -54,13 +54,6 @@
 		<None Include="**\*.android.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 		<Compile Remove="**\android\**\*.cs" />
 		<None Include="**\android\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-	</ItemGroup>
-	<!-- Windows -->
-	<ItemGroup Condition="$(TargetFramework.StartsWith('net')) == true AND $(TargetFramework.Contains('-windows')) != true">
-		<Compile Remove="**\*.windows.cs" />
-		<None Include="**\*.windows.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-		<Compile Remove="**\windows\**\*.cs" />
-		<None Include="**\windows\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 	</ItemGroup>
 	<!-- .NET (generic) -->
 	<ItemGroup Condition="!($(TargetFramework.StartsWith('net')) == true AND $(TargetFramework.EndsWith('.0')) == true AND $(TargetFramework.Contains('-')) != true)">

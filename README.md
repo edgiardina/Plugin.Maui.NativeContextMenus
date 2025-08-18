@@ -7,19 +7,21 @@
 
 ## Features
 
-- **Cross-platform**: Works on Android, iOS, macOS, and Windows
+- **Cross-platform**: Works on Android, iOS, and macOS
 - **Native UI**: Uses each platform's native context menu implementation
 - **Easy Integration**: Simple API that integrates seamlessly with .NET MAUI
 - **Customizable**: Support for various menu item types and configurations
 
 ## Supported Platforms
 
-| Platform | Minimum Version Supported |
-| -------- | ------------------------- |
-| iOS      | 14.2+                     |
-| macOS    | 14.0+                     |
-| Android  | API 21 (Android 5.0)+     |
-| Windows  | 10.0.17763.0+             |
+| Platform | Minimum Version Supported | Notes |
+| -------- | ------------------------- | ----- |
+| iOS      | 14.2+                     | ✅ Supported |
+| macOS    | 14.0+                     | ✅ Supported |
+| Android  | API 21 (Android 5.0)+     | ✅ Supported |
+| Windows  | N/A                       | ❌ Not supported - use [built-in .NET MAUI context menus](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/context-menu?view=net-maui-9.0) |
+
+> **Note for Windows developers**: Windows already has excellent built-in context menu support through .NET MAUI. Please refer to the [official documentation](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/context-menu?view=net-maui-9.0) for implementing context menus on Windows.
 
 ## Installation
 
@@ -98,6 +100,26 @@ You can also define context menus in XAML:
 </ContentPage>
 ```
 
+## Platform-Specific Notes
+
+### Windows Alternative
+For Windows applications, use the built-in .NET MAUI context menu support instead:
+
+```xml
+<Label Text="Right-click me!">
+    <FlyoutBase.ContextFlyout>
+        <MenuFlyout>
+            <MenuFlyoutItem Text="Copy" Command="{Binding CopyCommand}" />
+            <MenuFlyoutItem Text="Paste" Command="{Binding PasteCommand}" />
+            <MenuFlyoutSeparator />
+            <MenuFlyoutItem Text="Delete" Command="{Binding DeleteCommand}" />
+        </MenuFlyout>
+    </FlyoutBase.ContextFlyout>
+</Label>
+```
+
+See the [official documentation](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/context-menu?view=net-maui-9.0) for more details.
+
 ## Advanced Features
 
 ### Menu Item Types
@@ -158,9 +180,6 @@ Uses `UIContextMenuConfiguration` and `NSMenu` respectively for native context m
 
 ### Android
 Implements context menus using `PopupMenu` and `ContextMenu` APIs.
-
-### Windows
-Utilizes `MenuFlyout` for WinUI context menu functionality.
 
 ## Contributing
 
