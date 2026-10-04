@@ -1,207 +1,177 @@
 # Plugin.Maui.NativeContextMenus
 
 [![NuGet](https://img.shields.io/nuget/v/Plugin.Maui.NativeContextMenus.svg)](https://www.nuget.org/packages/Plugin.Maui.NativeContextMenus/)
-[![NuGet Downloads](https://img.shields.io/nuget/dt/Plugin.Maui.NativeContextMenus.svg)](https://www.nuget.org/packages/Plugin.Maui.NativeContextMenus/)
 
-`Plugin.Maui.NativeContextMenus` provides the ability to create native context menus in your .NET MAUI application.
+`Plugin.Maui.NativeContextMenus` adds native context menus to views in a .NET MAUI app.
 
-## Features
+.NET MAUI has a context menu (`FlyoutBase.ContextFlyout`) only on Windows and Mac Catalyst. This plugin gives the same function on iOS and Android.
 
-- **Cross-platform**: Works on Android, iOS, and macOS
-- **Native UI**: Uses each platform's native context menu implementation
-- **Easy Integration**: Simple API that integrates seamlessly with .NET MAUI
-- **Customizable**: Support for various menu item types and configurations
+## Screenshots
+
+These screenshots show the sample app. The same XAML makes the menus on the two platforms.
+
+|         | Menu with sections | Submenu with a radio group | Menu on a list item |
+| ------- | ------------------ | -------------------------- | ------------------- |
+| iOS     | ![An iOS context menu with sections, a check mark, and a submenu](docs/images/ios-menu.png) | ![An iOS submenu with a radio group](docs/images/ios-submenu.png) | ![An iOS context menu on a list item](docs/images/ios-list-item.png) |
+| Android | ![An Android context menu with sections, a check box, and a submenu](docs/images/android-menu.png) | ![An Android submenu with a radio group](docs/images/android-submenu.png) | ![An Android context menu on a list item](docs/images/android-list-item.png) |
 
 ## Supported Platforms
 
-| Platform | Minimum Version Supported | Notes |
-| -------- | ------------------------- | ----- |
-| iOS      | 14.2+                     | ✅ Supported |
-| macOS    | 14.0+                     | ✅ Supported |
-| Android  | API 21 (Android 5.0)+     | ✅ Supported |
-| Windows  | N/A                       | ❌ Not supported - use [built-in .NET MAUI context menus](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/context-menu?view=net-maui-9.0) |
+| Platform     | Minimum version | Native control                             | Gesture                    |
+| ------------ | --------------- | ------------------------------------------ | -------------------------- |
+| iOS          | 14.2            | `UIContextMenuInteraction` with a `UIMenu` | Long press                 |
+| Mac Catalyst | 14.0            | `UIContextMenuInteraction` with a `UIMenu` | Secondary click            |
+| Android      | API 21          | `PopupMenu` anchored to the view           | Long press                 |
+| Windows      | Not supported   | Use `FlyoutBase.ContextFlyout`             |                            |
 
-> **Note for Windows developers**: Windows already has excellent built-in context menu support through .NET MAUI. Please refer to the [official documentation](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/context-menu?view=net-maui-9.0) for implementing context menus on Windows.
+On Windows, use the [.NET MAUI context menu](https://learn.microsoft.com/dotnet/maui/user-interface/context-menu).
+
+## Supported .NET Versions
+
+The package has assemblies for .NET 9 and .NET 10.
+
+| App target | Minimum .NET MAUI version |
+| ---------- | ------------------------- |
+| .NET 9     | 9.0.0                     |
+| .NET 10    | 10.0.0                    |
 
 ## Installation
-
-`Plugin.Maui.NativeContextMenus` is available on NuGet. Add it to your project using:
 
 ```xml
 <PackageReference Include="Plugin.Maui.NativeContextMenus" Version="1.0.0" />
 ```
 
-Or via the Package Manager Console:
+The context menu does not need a registration call in `MauiProgram.cs`.
 
-```powershell
-Install-Package Plugin.Maui.NativeContextMenus
-```
+## Usage
 
-## Getting Started
-
-### 1. Register the Plugin
-
-In your `MauiProgram.cs` file, add the plugin to your MAUI app:
-
-```csharp
-public static class MauiProgram
-{
-    public static MauiApp CreateMauiApp()
-    {
-        var builder = MauiApp.CreateBuilder();
-        builder
-            .UseMauiApp<App>()
-            .UseNativeContextMenus(); // Add this line
-            
-        return builder.Build();
-    }
-}
-```
-
-### 2. Basic Usage
-
-Add context menus to your views:
-
-```csharp
-// In your page or view
-var label = new Label { Text = "Right-click me!" };
-
-var contextMenu = new NativeContextMenu();
-contextMenu.MenuItems.Add(new MenuNode 
-{ 
-    Text = "Copy", 
-    Command = new Command(() => /* Handle copy */) 
-});
-contextMenu.MenuItems.Add(new MenuNode 
-{ 
-    Text = "Paste", 
-    Command = new Command(() => /* Handle paste */) 
-});
-
-NativeContextMenus.SetContextMenu(label, contextMenu);
-```
-
-### 3. XAML Usage
-
-You can also define context menus in XAML:
+Add the XML namespace to the page:
 
 ```xml
-<ContentPage xmlns:cm="clr-namespace:Plugin.Maui.NativeContextMenus;assembly=Plugin.Maui.NativeContextMenus">
-    <Label Text="Right-click me!">
-        <cm:NativeContextMenus.ContextMenu>
-            <cm:NativeContextMenu>
-                <cm:MenuNode Text="Copy" Command="{Binding CopyCommand}" />
-                <cm:MenuNode Text="Paste" Command="{Binding PasteCommand}" />
-                <cm:MenuNode Text="-" /> <!-- Separator -->
-                <cm:MenuNode Text="Delete" Command="{Binding DeleteCommand}" />
-            </cm:NativeContextMenu>
-        </cm:NativeContextMenus.ContextMenu>
-    </Label>
-</ContentPage>
+xmlns:cm="clr-namespace:Plugin.Maui.NativeContextMenus;assembly=Plugin.Maui.NativeContextMenus"
 ```
 
-## Platform-Specific Notes
-
-### Windows Alternative
-For Windows applications, use the built-in .NET MAUI context menu support instead:
+Set the `NativeContextMenus.ContextMenu` attached property on a view:
 
 ```xml
-<Label Text="Right-click me!">
-    <FlyoutBase.ContextFlyout>
-        <MenuFlyout>
-            <MenuFlyoutItem Text="Copy" Command="{Binding CopyCommand}" />
-            <MenuFlyoutItem Text="Paste" Command="{Binding PasteCommand}" />
-            <MenuFlyoutSeparator />
-            <MenuFlyoutItem Text="Delete" Command="{Binding DeleteCommand}" />
-        </MenuFlyout>
-    </FlyoutBase.ContextFlyout>
-</Label>
+<Border>
+    <Label Text="Long press this card" />
+
+    <cm:NativeContextMenus.ContextMenu>
+        <cm:NativeContextMenu Title="Card">
+            <cm:MenuNode Title="Copy" Icon="doc.on.doc" Command="{Binding CopyCommand}" />
+            <cm:MenuNode Title="Share" Icon="square.and.arrow.up" Command="{Binding ShareCommand}" />
+
+            <!-- A node with children and no Title is an inline section with dividers -->
+            <cm:MenuNode>
+                <cm:MenuNode Title="Favorite" IsCheckable="True" IsChecked="{Binding IsFavorite, Mode=TwoWay}" />
+
+                <!-- A node with children and a Title is a submenu -->
+                <cm:MenuNode Title="Sort By">
+                    <cm:MenuNode Title="Name" GroupKey="sort" IsCheckable="True" IsChecked="True" />
+                    <cm:MenuNode Title="Date" GroupKey="sort" IsCheckable="True" />
+                </cm:MenuNode>
+            </cm:MenuNode>
+
+            <cm:MenuNode Title="Delete" Icon="trash" Destructive="True" Command="{Binding DeleteCommand}" />
+        </cm:NativeContextMenu>
+    </cm:NativeContextMenus.ContextMenu>
+</Border>
 ```
 
-See the [official documentation](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/context-menu?view=net-maui-9.0) for more details.
+The menu gets the `BindingContext` of the view. Thus bindings in a `MenuNode` work the same as bindings in the view.
 
-## Advanced Features
+### List items
 
-### Menu Item Types
+In an item template, the `BindingContext` is the item. Use a `RelativeSource` binding to get a command from the page view model. Send the item as the parameter.
 
-- **Standard Items**: Regular menu items with text and commands
-- **Separators**: Visual dividers between menu groups
-- **Submenus**: Nested menu structures
-- **Icons**: Platform-specific icon support
+```xml
+<CollectionView ItemsSource="{Binding Machines}">
+    <CollectionView.ItemTemplate>
+        <DataTemplate>
+            <Grid Padding="12">
+                <Label Text="{Binding Name}" />
 
-### Conditional Menu Items
+                <cm:NativeContextMenus.ContextMenu>
+                    <cm:NativeContextMenu>
+                        <cm:MenuNode Title="Remove"
+                                     Destructive="True"
+                                     Command="{Binding RemoveCommand, Source={RelativeSource AncestorType={x:Type local:MachinesViewModel}}}"
+                                     CommandParameter="{Binding .}" />
+                    </cm:NativeContextMenu>
+                </cm:NativeContextMenus.ContextMenu>
+            </Grid>
+        </DataTemplate>
+    </CollectionView.ItemTemplate>
+</CollectionView>
+```
+
+### C#
 
 ```csharp
-var menuItem = new MenuNode
-{
-    Text = "Conditional Item",
-    Command = myCommand,
-    IsVisible = someCondition,
-    IsEnabled = anotherCondition
-};
+var menu = new NativeContextMenu();
+menu.Items.Add(new MenuNode { Title = "Copy", Command = copyCommand });
+menu.Items.Add(new MenuNode { Title = "Delete", Destructive = true, Command = deleteCommand });
+
+NativeContextMenus.SetContextMenu(label, menu);
 ```
 
-## Sample App
+Set the property to `null` to remove the menu.
 
-Check out the [sample application](samples/) to see the plugin in action and learn about all the available features.
-
-## API Reference
+## API
 
 ### NativeContextMenu
 
-The main class for creating context menus.
-
-**Properties:**
-- `MenuItems`: Collection of `MenuNode` items
+| Member       | Description                                                          |
+| ------------ | -------------------------------------------------------------------- |
+| `Items`      | The top-level `MenuNode` items. This is the XAML content property.   |
+| `Title`      | Header text. iOS and Mac Catalyst only.                              |
+| `ItemTapped` | Event. Occurs after the user taps a leaf node and its command runs.  |
 
 ### MenuNode
 
-Represents a single menu item.
+| Member             | Description                                                                             |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| `Title`            | The text of the item.                                                                   |
+| `Icon`             | The image of the item. Refer to [Icons](#icons).                                        |
+| `Command`          | The command that runs when the user taps the item.                                      |
+| `CommandParameter` | The parameter for `Command`.                                                            |
+| `IsEnabled`        | `false` shows the item as disabled.                                                     |
+| `IsVisible`        | `false` removes the item from the menu.                                                 |
+| `Destructive`      | `true` shows the item in red. iOS and Mac Catalyst only.                                |
+| `IsCheckable`      | `true` gives the item a check mark state.                                               |
+| `IsChecked`        | The check mark state. A tap changes this value before the command runs.                 |
+| `GroupKey`         | Checkable items with the same key are a radio group. A tap on one item clears the others. |
+| `KeepMenuOpen`     | `true` keeps the menu open after a tap. iOS 16 and Mac Catalyst 16 or later only.       |
+| `Children`         | Child items. This is the XAML content property.                                         |
+| `Tapped`           | Event. Occurs after the user taps the item.                                             |
 
-**Properties:**
-- `Text`: The display text for the menu item
-- `Command`: The command to execute when the item is selected
-- `CommandParameter`: Optional parameter for the command
-- `IsVisible`: Whether the item should be visible
-- `IsEnabled`: Whether the item should be enabled
-- `Icon`: Platform-specific icon (optional)
-- `Children`: Child menu items for submenus
+A node with `Children` and a `Title` is a submenu. A node with `Children` and no `Title` is an inline section.
 
-### NativeContextMenus (Static Class)
+The plugin builds the native menu each time the menu opens. As a result, the menu always shows the current property values.
 
-**Methods:**
-- `SetContextMenu(BindableObject, NativeContextMenu)`: Attaches a context menu to a view
-- `GetContextMenu(BindableObject)`: Retrieves the context menu from a view
+### Icons
 
-## Platform Implementation Details
+| Source            | iOS and Mac Catalyst                                    | Android                                        |
+| ----------------- | ------------------------------------------------------- | ---------------------------------------------- |
+| `FileImageSource` | An image in the app bundle. If there is no image with that name, the name is used as an SF Symbol name. | A drawable resource (this includes `MauiImage` files). Shown on API 29 or later. |
+| `FontImageSource` | Supported.                                              | Not supported.                                 |
+| Other sources     | Not supported.                                          | Not supported.                                 |
 
-### iOS/macOS
-Uses `UIContextMenuConfiguration` and `NSMenu` respectively for native context menu support.
+## Known Limits
 
-### Android
-Implements context menus using `PopupMenu` and `ContextMenu` APIs.
+- Android shows a `PopupMenu`. It does not show the lifted preview of the view that iOS shows.
+- On Android, the plugin sets the long click listener of the platform view. A view cannot have a different long click listener at the same time.
+- The menu of a parent view does not open from a child view that handles touch input itself (for example a `Button`).
 
-## Contributing
+## Toolbar Menus (experimental)
 
-Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTING.md) before submitting pull requests.
+`NativeContextMenuToolbarItem` puts a `MenuNode` menu on a toolbar item. This part of the plugin is not complete. Refer to [TOOLBAR_MENU_USAGE.md](src/Plugin.Maui.NativeContextMenus/TOOLBAR_MENU_USAGE.md).
+
+## Sample App
+
+The [sample app](samples/) has a page for the view context menu and a page for the toolbar menu.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Thanks to the .NET MAUI team for providing the framework
-- Inspired by native context menu implementations across platforms
-
-## Support
-
-If you encounter any issues or have questions:
-
-1. Check the [sample app](samples/) for usage examples
-2. Browse the [issues](https://github.com/jfversluis/Plugin.Maui.NativeContextMenus/issues) on GitHub
-3. Create a new issue if you can't find an existing solution
-
----
-
-Made with ❤️ for the .NET MAUI community
+MIT. Refer to [LICENSE](LICENSE).

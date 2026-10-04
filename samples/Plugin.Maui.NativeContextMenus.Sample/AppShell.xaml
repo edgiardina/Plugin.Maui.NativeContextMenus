@@ -6,8 +6,14 @@
     xmlns:pages="clr-namespace:Plugin.Maui.Feature.Sample"
     Shell.FlyoutBehavior="Disabled">
 
-    <ShellContent
-        Title="Feature Plugin"
-        ContentTemplate="{DataTemplate pages:MainPage}" />
+    <TabBar>
+        <ShellContent
+            Title="Context Menu"
+            ContentTemplate="{DataTemplate pages:ContextMenuPage}" />
+
+        <ShellContent
+            Title="Toolbar Menu"
+            ContentTemplate="{DataTemplate pages:MainPage}" />
+    </TabBar>
 
 </Shell>

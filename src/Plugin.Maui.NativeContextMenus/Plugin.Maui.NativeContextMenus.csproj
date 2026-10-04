@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst;net9.0</TargetFrameworks>
+		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst;net9.0;net10.0-android;net10.0-ios;net10.0-maccatalyst;net10.0</TargetFrameworks>
 		<!-- Windows is not supported - use built-in .NET MAUI context menu support instead -->
 		<!-- See: https://learn.microsoft.com/en-us/dotnet/maui/user-interface/context-menu?view=net-maui-9.0 -->
 		
@@ -10,6 +10,10 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<UseMaui>true</UseMaui>
+
+		<!-- Build against the first .NET MAUI release of each .NET version. This is the minimum version that an app must have. -->
+		<MauiVersion Condition="$([MSBuild]::VersionEquals($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '9.0'))">9.0.0</MauiVersion>
+		<MauiVersion Condition="$([MSBuild]::VersionEquals($([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')), '10.0'))">10.0.0</MauiVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>

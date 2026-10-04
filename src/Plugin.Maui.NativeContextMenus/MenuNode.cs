@@ -10,11 +10,12 @@ using System.Windows.Input;
 namespace Plugin.Maui.NativeContextMenus
 {
     /// <summary>
-    /// XAML-friendly menu tree node for MenuToolbarItem.
+    /// XAML-friendly menu tree node for NativeContextMenu and NativeContextMenuToolbarItem.
     /// All properties are bindable; use Children to build submenus.
+    /// A node with Children and no Title is an inline section (a divided group).
     /// </summary>
     [ContentProperty(nameof(Children))]
-    public class MenuNode : BindableObject
+    public class MenuNode : Element
     {
         // Title (e.g., "Ranking Type: WPPR" or "WPPR")
         public static readonly BindableProperty TitleProperty =
@@ -44,6 +45,16 @@ namespace Plugin.Maui.NativeContextMenus
         {
             get => (bool)GetValue(IsEnabledProperty);
             set => SetValue(IsEnabledProperty, value);
+        }
+
+        // Hidden nodes are left out of the native menu
+        public static readonly BindableProperty IsVisibleProperty =
+            BindableProperty.Create(nameof(IsVisible), typeof(bool), typeof(MenuNode), true);
+
+        public bool IsVisible
+        {
+            get => (bool)GetValue(IsVisibleProperty);
+            set => SetValue(IsVisibleProperty, value);
         }
 
         // Destructive (maps to red style on iOS, etc.)
@@ -120,6 +131,14 @@ namespace Plugin.Maui.NativeContextMenus
         /// Child nodes (submenu contents). Empty = leaf action.
         /// </summary>
         public ObservableCollection<MenuNode> Children { get; } = new();
+
+        public MenuNode()
+        {
+            // Children are logical children so BindingContext and RelativeSource bindings reach them
+            Children.CollectionChanged += (_, e) => MenuTree.SyncLogicalChildren(this, Children, e);
+        }
+
+        internal bool IsSection => Children.Count > 0 && string.IsNullOrEmpty(Title);
 
         /// <summary>
         /// Optional code-behind event for zero-binding scenarios.
