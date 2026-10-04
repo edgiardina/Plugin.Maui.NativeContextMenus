@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Plugin.Maui.NativeContextMenus;
 
-namespace Plugin.Maui.Feature.Sample;
+namespace Plugin.Maui.NativeContextMenus.Sample;
 
 public static class MauiProgram
 {

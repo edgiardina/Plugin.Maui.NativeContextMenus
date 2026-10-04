@@ -1,6 +1,6 @@
 ﻿using Plugin.Maui.NativeContextMenus;
 
-namespace Plugin.Maui.Feature.Sample;
+namespace Plugin.Maui.NativeContextMenus.Sample;
 
 public partial class MainPage : ContentPage
 {

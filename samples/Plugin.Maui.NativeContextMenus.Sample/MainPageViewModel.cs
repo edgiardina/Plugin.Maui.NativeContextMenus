@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Plugin.Maui.NativeContextMenus;
 
-namespace Plugin.Maui.Feature.Sample;
+namespace Plugin.Maui.NativeContextMenus.Sample;
 
 public class MainPageViewModel : INotifyPropertyChanged
 {
