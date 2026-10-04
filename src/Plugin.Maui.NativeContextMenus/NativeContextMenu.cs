@@ -19,6 +19,17 @@ public class NativeContextMenu : Element
         set => SetValue(TitleProperty, value);
     }
 
+    // The gesture that opens the menu
+    public static readonly BindableProperty TriggerProperty =
+        BindableProperty.Create(nameof(Trigger), typeof(ContextMenuTrigger), typeof(NativeContextMenu), ContextMenuTrigger.LongPress,
+            propertyChanged: (bindable, _, _) => NativeContextMenus.Reattach((NativeContextMenu)bindable));
+
+    public ContextMenuTrigger Trigger
+    {
+        get => (ContextMenuTrigger)GetValue(TriggerProperty);
+        set => SetValue(TriggerProperty, value);
+    }
+
     public ObservableCollection<MenuNode> Items { get; } = new();
 
     /// <summary>
@@ -29,6 +40,15 @@ public class NativeContextMenu : Element
     public NativeContextMenu()
     {
         Items.CollectionChanged += (_, e) => MenuTree.SyncLogicalChildren(this, Items, e);
+    }
+
+    /// <summary>
+    /// Opens the menu. This does nothing if the menu is not attached to a view on screen.
+    /// </summary>
+    public void Show()
+    {
+        if (Parent is VisualElement view)
+            NativeContextMenus.Show(view);
     }
 
     internal bool HasVisibleItems => Items.Any(n => n.IsVisible);

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
-namespace Plugin.Maui.Feature.Sample;
+namespace Plugin.Maui.NativeContextMenus.Sample;
 
 public partial class ContextMenuPage : ContentPage
 {
@@ -12,6 +12,8 @@ public partial class ContextMenuPage : ContentPage
         InitializeComponent();
         BindingContext = new ContextMenuViewModel();
     }
+
+    void OnOpenCardMenuClicked(object sender, EventArgs e) => CardMenu.Show();
 }
 
 public class ContextMenuViewModel : INotifyPropertyChanged

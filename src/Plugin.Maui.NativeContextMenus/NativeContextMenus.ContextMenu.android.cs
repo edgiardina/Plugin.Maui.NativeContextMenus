@@ -9,64 +9,88 @@ namespace Plugin.Maui.NativeContextMenus;
 
 public static partial class NativeContextMenus
 {
-    static readonly ConditionalWeakTable<AView, LongClickListener> listeners = new();
+    static readonly ConditionalWeakTable<AView, TriggerListener> listeners = new();
 
     static partial void PlatformAttach(VisualElement element, object platformView)
     {
-        if (platformView is not AView view || listeners.TryGetValue(view, out _))
+        if (platformView is not AView view ||
+            listeners.TryGetValue(view, out _) ||
+            GetContextMenu(element) is not { } menu)
             return;
 
-        var listener = new LongClickListener(element);
-        view.SetOnLongClickListener(listener);
+        var listener = new TriggerListener(element, menu.Trigger);
+        if (listener.Trigger == ContextMenuTrigger.Tap)
+            view.SetOnClickListener(listener);
+        else
+            view.SetOnLongClickListener(listener);
         listeners.Add(view, listener);
     }
 
     static partial void PlatformDetach(object? platformView)
     {
-        if (platformView is not AView view || !listeners.TryGetValue(view, out _))
+        if (platformView is not AView view || !listeners.TryGetValue(view, out var listener))
             return;
 
-        view.SetOnLongClickListener(null);
-        view.LongClickable = false;
+        if (listener.Trigger == ContextMenuTrigger.Tap)
+        {
+            view.SetOnClickListener(null);
+            view.Clickable = false;
+        }
+        else
+        {
+            view.SetOnLongClickListener(null);
+            view.LongClickable = false;
+        }
+
         listeners.Remove(view);
     }
 
-    sealed class LongClickListener : Java.Lang.Object, AView.IOnLongClickListener
+    static partial void PlatformShow(VisualElement element, object platformView)
     {
-        readonly WeakReference<VisualElement> element;
+        if (platformView is AView view)
+            ShowPopup(view, element);
+    }
 
-        public LongClickListener(VisualElement element) =>
-            this.element = new WeakReference<VisualElement>(element);
+    static bool ShowPopup(AView anchor, VisualElement element)
+    {
+        if (anchor.Context is not { } context ||
+            GetContextMenu(element) is not { HasVisibleItems: true } menu)
+            return false;
 
-        public bool OnLongClick(AView? v)
+        var popup = new PopupMenu(context, anchor);
+        if (popup.Menu is not { } root)
+            return false;
+
+        // The menu is built each time it opens, so it always shows the current node state
+        var builder = new PopupBuilder(context);
+        builder.AddNodes(root, menu.Items);
+
+        if (OperatingSystem.IsAndroidVersionAtLeast(28))
+            root.SetGroupDividerEnabled(true);
+        if (OperatingSystem.IsAndroidVersionAtLeast(29))
+            popup.SetForceShowIcon(true);
+
+        popup.MenuItemClick += (_, e) =>
         {
-            if (v?.Context is not { } context ||
-                !element.TryGetTarget(out var target) ||
-                GetContextMenu(target) is not { HasVisibleItems: true } menu)
-                return false;
+            if (e.Item is { } item && builder.Leaves.TryGetValue(item.ItemId, out var node))
+                menu.Activate(node);
+        };
 
-            var popup = new PopupMenu(context, v);
-            if (popup.Menu is not { } root)
-                return false;
+        popup.Show();
+        return true;
+    }
 
-            // The menu is built each time it opens, so it always shows the current node state
-            var builder = new PopupBuilder(context);
-            builder.AddNodes(root, menu.Items);
+    sealed class TriggerListener(VisualElement element, ContextMenuTrigger trigger)
+        : Java.Lang.Object, AView.IOnClickListener, AView.IOnLongClickListener
+    {
+        readonly WeakReference<VisualElement> element = new(element);
 
-            if (OperatingSystem.IsAndroidVersionAtLeast(28))
-                root.SetGroupDividerEnabled(true);
-            if (OperatingSystem.IsAndroidVersionAtLeast(29))
-                popup.SetForceShowIcon(true);
+        public ContextMenuTrigger Trigger { get; } = trigger;
 
-            popup.MenuItemClick += (_, e) =>
-            {
-                if (e.Item is { } item && builder.Leaves.TryGetValue(item.ItemId, out var node))
-                    menu.Activate(node);
-            };
+        public void OnClick(AView? v) => OnLongClick(v);
 
-            popup.Show();
-            return true;
-        }
+        public bool OnLongClick(AView? v) =>
+            v is not null && element.TryGetTarget(out var target) && ShowPopup(v, target);
     }
 
     sealed class PopupBuilder(Context context)

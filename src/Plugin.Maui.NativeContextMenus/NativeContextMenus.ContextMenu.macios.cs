@@ -14,12 +14,16 @@ public static partial class NativeContextMenus
 
     static partial void PlatformAttach(VisualElement element, object platformView)
     {
-        if (platformView is not UIView view || attachments.TryGetValue(view, out _))
+        if (platformView is not UIView view ||
+            attachments.TryGetValue(view, out _) ||
+            GetContextMenu(element) is not { } menu)
             return;
 
-        var attachment = new Attachment(element);
+        var attachment = new Attachment(element, view, menu.Trigger);
         view.UserInteractionEnabled = true;
-        view.AddInteraction(attachment.Interaction);
+        view.AddSubview(attachment.Button);
+        if (attachment.Interaction is not null)
+            view.AddInteraction(attachment.Interaction);
         attachments.Add(view, attachment);
     }
 
@@ -28,43 +32,80 @@ public static partial class NativeContextMenus
         if (platformView is not UIView view || !attachments.TryGetValue(view, out var attachment))
             return;
 
-        view.RemoveInteraction(attachment.Interaction);
+        attachment.Button.RemoveFromSuperview();
+        if (attachment.Interaction is not null)
+            view.RemoveInteraction(attachment.Interaction);
         attachments.Remove(view);
     }
 
+    static partial void PlatformShow(VisualElement element, object platformView)
+    {
+        if (platformView is UIView view && attachments.TryGetValue(view, out var attachment))
+            attachment.Button.PerformPrimaryAction();
+    }
+
+    // The elements are built each time the menu opens, so the menu always shows the current node state
+    static UIMenuElement[] BuildElements(WeakReference<VisualElement> element) =>
+        element.TryGetTarget(out var target) && GetContextMenu(target) is { HasVisibleItems: true } menu
+            ? BuildElements(menu.Items, menu, target.Handler?.MauiContext)
+            : [];
+
+    static string GetTitle(WeakReference<VisualElement> element) =>
+        element.TryGetTarget(out var target) ? GetContextMenu(target)?.Title ?? string.Empty : string.Empty;
+
     sealed class Attachment
     {
-        readonly InteractionDelegate interactionDelegate;
+        readonly InteractionDelegate? interactionDelegate;
 
-        public UIContextMenuInteraction Interaction { get; }
+        // UIKit can open a menu on tap or from code only for a button, so each view gets a clear button.
+        // The button ignores touches unless the trigger is Tap.
+        public MenuButton Button { get; }
 
-        public Attachment(VisualElement element)
+        public UIContextMenuInteraction? Interaction { get; }
+
+        public Attachment(VisualElement element, UIView view, ContextMenuTrigger trigger)
         {
-            interactionDelegate = new InteractionDelegate(element);
-            Interaction = new UIContextMenuInteraction(interactionDelegate);
+            var weakElement = new WeakReference<VisualElement>(element);
+
+            var deferred = UIDeferredMenuElement.CreateUncached(completion => completion(BuildElements(weakElement)));
+
+            Button = new MenuButton
+            {
+                Frame = view.Bounds,
+                AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight,
+                IgnoresTouches = trigger != ContextMenuTrigger.Tap,
+                IsAccessibilityElement = false,
+                ShowsMenuAsPrimaryAction = true,
+                Menu = UIMenu.Create(GetTitle(weakElement), [deferred]),
+            };
+
+            if (trigger == ContextMenuTrigger.LongPress)
+            {
+                interactionDelegate = new InteractionDelegate(weakElement);
+                Interaction = new UIContextMenuInteraction(interactionDelegate);
+            }
         }
     }
 
-    sealed class InteractionDelegate : UIContextMenuInteractionDelegate
+    sealed class MenuButton : UIButton
     {
-        readonly WeakReference<VisualElement> element;
+        public bool IgnoresTouches { get; set; }
 
-        public InteractionDelegate(VisualElement element) =>
-            this.element = new WeakReference<VisualElement>(element);
+        public override bool PointInside(CGPoint point, UIEvent? uievent) =>
+            !IgnoresTouches && base.PointInside(point, uievent);
+    }
 
+    sealed class InteractionDelegate(WeakReference<VisualElement> element) : UIContextMenuInteractionDelegate
+    {
         public override UIContextMenuConfiguration? GetConfigurationForMenu(UIContextMenuInteraction interaction, CGPoint location)
         {
-            if (!element.TryGetTarget(out var target) ||
-                GetContextMenu(target) is not { HasVisibleItems: true } menu)
+            if (BuildElements(element).Length == 0)
                 return null;
 
-            var mauiContext = target.Handler?.MauiContext;
-
-            // The menu is built each time it opens, so it always shows the current node state
             return UIContextMenuConfiguration.Create(
                 identifier: null,
                 previewProvider: null,
-                actionProvider: _ => UIMenu.Create(menu.Title ?? string.Empty, BuildElements(menu.Items, menu, mauiContext)));
+                actionProvider: _ => UIMenu.Create(GetTitle(element), BuildElements(element)));
         }
     }
 
@@ -74,7 +115,7 @@ public static partial class NativeContextMenus
     static UIMenuElement BuildElement(MenuNode node, NativeContextMenu owner, IMauiContext? mauiContext)
     {
         var title = node.Title ?? string.Empty;
-        var image = ToUIImage(node.Icon, mauiContext);
+        var image = ToUIImage(node, mauiContext);
 
         if (node.Children.Count > 0)
         {
@@ -94,7 +135,7 @@ public static partial class NativeContextMenus
             attributes |= UIMenuElementAttributes.Disabled;
         if (node.Destructive)
             attributes |= UIMenuElementAttributes.Destructive;
-        if (node.KeepMenuOpen && (OperatingSystem.IsIOSVersionAtLeast(16) || OperatingSystem.IsMacCatalystVersionAtLeast(16)))
+        if (node.KeepMenuOpen)
             attributes |= UIMenuElementAttributes.KeepsMenuPresented;
         action.Attributes = attributes;
 
@@ -102,13 +143,21 @@ public static partial class NativeContextMenus
         return action;
     }
 
-    static UIImage? ToUIImage(ImageSource? source, IMauiContext? mauiContext) => source switch
+    static UIImage? ToUIImage(MenuNode node, IMauiContext? mauiContext)
     {
-        // A file name that is not in the app bundle is used as an SF Symbol name
-        FileImageSource { File: { Length: > 0 } file } => UIImage.FromBundle(file) ?? UIImage.GetSystemImage(file),
-        FontImageSource { Glyph: { Length: > 0 } } font when mauiContext is not null => RenderGlyph(font, mauiContext),
-        _ => null,
-    };
+        var image = node.Icon switch
+        {
+            FileImageSource { File: { Length: > 0 } file } => UIImage.FromBundle(file),
+            FontImageSource { Glyph: { Length: > 0 } } font when mauiContext is not null => RenderGlyph(font, mauiContext),
+            _ => null,
+        };
+
+        if (image is not null)
+            return image;
+
+        var symbol = string.IsNullOrEmpty(node.SymbolName) ? SystemIconSymbols.Name(node.SystemIcon) : node.SymbolName;
+        return symbol is null ? null : UIImage.GetSystemImage(symbol);
+    }
 
     static UIImage RenderGlyph(FontImageSource source, IMauiContext mauiContext)
     {

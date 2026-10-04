@@ -37,6 +37,26 @@ namespace Plugin.Maui.NativeContextMenus
             set => SetValue(IconProperty, value);
         }
 
+        // System icon with autocomplete (iOS and Mac Catalyst). Icon has priority if it is set.
+        public static readonly BindableProperty SystemIconProperty =
+            BindableProperty.Create(nameof(SystemIcon), typeof(SystemIcon), typeof(MenuNode), SystemIcon.None);
+
+        public SystemIcon SystemIcon
+        {
+            get => (SystemIcon)GetValue(SystemIconProperty);
+            set => SetValue(SystemIconProperty, value);
+        }
+
+        // SF Symbol name, for a symbol that SystemIcon does not have (iOS and Mac Catalyst)
+        public static readonly BindableProperty SymbolNameProperty =
+            BindableProperty.Create(nameof(SymbolName), typeof(string), typeof(MenuNode), default(string));
+
+        public string? SymbolName
+        {
+            get => (string?)GetValue(SymbolNameProperty);
+            set => SetValue(SymbolNameProperty, value);
+        }
+
         // Enabled/disabled state
         public static readonly BindableProperty IsEnabledProperty =
             BindableProperty.Create(nameof(IsEnabled), typeof(bool), typeof(MenuNode), true);

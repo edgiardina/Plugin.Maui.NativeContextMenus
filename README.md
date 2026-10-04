@@ -19,9 +19,9 @@ These screenshots show the sample app. The same XAML makes the menus on the two 
 
 | Platform     | Minimum version | Native control                             | Gesture                    |
 | ------------ | --------------- | ------------------------------------------ | -------------------------- |
-| iOS          | 14.2            | `UIContextMenuInteraction` with a `UIMenu` | Long press                 |
-| Mac Catalyst | 14.0            | `UIContextMenuInteraction` with a `UIMenu` | Secondary click            |
-| Android      | API 21          | `PopupMenu` anchored to the view           | Long press                 |
+| iOS          | 17.4            | `UIContextMenuInteraction` with a `UIMenu` | Long press or tap          |
+| Mac Catalyst | 17.4            | `UIContextMenuInteraction` with a `UIMenu` | Secondary click or click   |
+| Android      | API 21          | `PopupMenu` anchored to the view           | Long press or tap          |
 | Windows      | Not supported   | Use `FlyoutBase.ContextFlyout`             |                            |
 
 On Windows, use the [.NET MAUI context menu](https://learn.microsoft.com/dotnet/maui/user-interface/context-menu).
@@ -59,8 +59,8 @@ Set the `NativeContextMenus.ContextMenu` attached property on a view:
 
     <cm:NativeContextMenus.ContextMenu>
         <cm:NativeContextMenu Title="Card">
-            <cm:MenuNode Title="Copy" Icon="doc.on.doc" Command="{Binding CopyCommand}" />
-            <cm:MenuNode Title="Share" Icon="square.and.arrow.up" Command="{Binding ShareCommand}" />
+            <cm:MenuNode Title="Copy" SystemIcon="Copy" Command="{Binding CopyCommand}" />
+            <cm:MenuNode Title="Share" SystemIcon="Share" Command="{Binding ShareCommand}" />
 
             <!-- A node with children and no Title is an inline section with dividers -->
             <cm:MenuNode>
@@ -73,7 +73,7 @@ Set the `NativeContextMenus.ContextMenu` attached property on a view:
                 </cm:MenuNode>
             </cm:MenuNode>
 
-            <cm:MenuNode Title="Delete" Icon="trash" Destructive="True" Command="{Binding DeleteCommand}" />
+            <cm:MenuNode Title="Delete" SystemIcon="Delete" Destructive="True" Command="{Binding DeleteCommand}" />
         </cm:NativeContextMenu>
     </cm:NativeContextMenus.ContextMenu>
 </Border>
@@ -106,6 +106,32 @@ In an item template, the `BindingContext` is the item. Use a `RelativeSource` bi
 </CollectionView>
 ```
 
+### Open the menu on a tap
+
+Set `Trigger` to `Tap`. The default is `LongPress`.
+
+```xml
+<cm:NativeContextMenu Trigger="Tap">
+    <cm:MenuNode Title="Open" SystemIcon="Open" Command="{Binding OpenCommand}" />
+</cm:NativeContextMenu>
+```
+
+On iOS, a menu that opens on a tap does not show the preview of the view.
+
+### Open the menu from code
+
+Give the menu a name and call `Show`. This works with the two triggers.
+
+```xml
+<cm:NativeContextMenu x:Name="CardMenu">
+```
+
+```csharp
+CardMenu.Show();
+```
+
+`NativeContextMenus.Show(view)` opens the menu of a view.
+
 ### C#
 
 ```csharp
@@ -126,6 +152,8 @@ Set the property to `null` to remove the menu.
 | ------------ | -------------------------------------------------------------------- |
 | `Items`      | The top-level `MenuNode` items. This is the XAML content property.   |
 | `Title`      | Header text. iOS and Mac Catalyst only.                              |
+| `Trigger`    | The gesture that opens the menu: `LongPress` (default) or `Tap`.     |
+| `Show()`     | Opens the menu from code.                                            |
 | `ItemTapped` | Event. Occurs after the user taps a leaf node and its command runs.  |
 
 ### MenuNode
@@ -133,7 +161,9 @@ Set the property to `null` to remove the menu.
 | Member             | Description                                                                             |
 | ------------------ | --------------------------------------------------------------------------------------- |
 | `Title`            | The text of the item.                                                                   |
-| `Icon`             | The image of the item. Refer to [Icons](#icons).                                        |
+| `SystemIcon`       | A system icon from the `SystemIcon` enum. Refer to [Icons](#icons).                     |
+| `SymbolName`       | An SF Symbol name, for a symbol that `SystemIcon` does not have.                        |
+| `Icon`             | An image of your own. It has priority over `SystemIcon`. Refer to [Icons](#icons).      |
 | `Command`          | The command that runs when the user taps the item.                                      |
 | `CommandParameter` | The parameter for `Command`.                                                            |
 | `IsEnabled`        | `false` shows the item as disabled.                                                     |
@@ -142,7 +172,7 @@ Set the property to `null` to remove the menu.
 | `IsCheckable`      | `true` gives the item a check mark state.                                               |
 | `IsChecked`        | The check mark state. A tap changes this value before the command runs.                 |
 | `GroupKey`         | Checkable items with the same key are a radio group. A tap on one item clears the others. |
-| `KeepMenuOpen`     | `true` keeps the menu open after a tap. iOS 16 and Mac Catalyst 16 or later only.       |
+| `KeepMenuOpen`     | `true` keeps the menu open after a tap. iOS and Mac Catalyst only.                      |
 | `Children`         | Child items. This is the XAML content property.                                         |
 | `Tapped`           | Event. Occurs after the user taps the item.                                             |
 
@@ -152,16 +182,25 @@ The plugin builds the native menu each time the menu opens. As a result, the men
 
 ### Icons
 
-| Source            | iOS and Mac Catalyst                                    | Android                                        |
-| ----------------- | ------------------------------------------------------- | ---------------------------------------------- |
-| `FileImageSource` | An image in the app bundle. If there is no image with that name, the name is used as an SF Symbol name. | A drawable resource (this includes `MauiImage` files). Shown on API 29 or later. |
-| `FontImageSource` | Supported.                                              | Not supported.                                 |
-| Other sources     | Not supported.                                          | Not supported.                                 |
+`SystemIcon` is the easiest way to set an icon. It is an enum, thus the editor shows the values (`Copy`, `Share`, `Delete`, `Edit`, and more).
+
+```xml
+<cm:MenuNode Title="Delete" SystemIcon="Delete" />
+```
+
+| Property     | iOS and Mac Catalyst                          | Android                                        |
+| ------------ | --------------------------------------------- | ---------------------------------------------- |
+| `SystemIcon` | The SF Symbol for the value.                  | No icon.                                       |
+| `SymbolName` | The SF Symbol with that name.                 | No icon.                                       |
+| `Icon`       | `FileImageSource` (an image in the app bundle) or `FontImageSource`. | `FileImageSource` only (a drawable resource, which includes `MauiImage` files). Shown on API 29 or later. |
+
+Android does not have system icons for menus. To show an icon on Android, set `Icon` to an image in your app.
 
 ## Known Limits
 
 - Android shows a `PopupMenu`. It does not show the lifted preview of the view that iOS shows.
-- On Android, the plugin sets the long click listener of the platform view. A view cannot have a different long click listener at the same time.
+- On Android, the plugin sets the long click listener of the platform view (the click listener when `Trigger` is `Tap`). A view cannot have a different listener of that type at the same time.
+- On iOS, the plugin adds a clear button to the platform view. The button gets touches only when `Trigger` is `Tap`.
 - The menu of a parent view does not open from a child view that handles touch input itself (for example a `Button`).
 
 ## Toolbar Menus (experimental)

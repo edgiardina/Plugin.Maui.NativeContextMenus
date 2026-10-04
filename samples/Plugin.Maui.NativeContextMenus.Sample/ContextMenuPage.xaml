@@ -2,11 +2,11 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:cm="clr-namespace:Plugin.Maui.NativeContextMenus;assembly=Plugin.Maui.NativeContextMenus"
-             xmlns:local="clr-namespace:Plugin.Maui.Feature.Sample"
-             x:Class="Plugin.Maui.Feature.Sample.ContextMenuPage"
+             xmlns:local="clr-namespace:Plugin.Maui.NativeContextMenus.Sample"
+             x:Class="Plugin.Maui.NativeContextMenus.Sample.ContextMenuPage"
              Title="Context Menu">
 
-    <Grid RowDefinitions="Auto,Auto,Auto,*" Padding="20" RowSpacing="16">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" Padding="20" RowSpacing="16">
 
         <Label Text="{Binding LastAction, StringFormat='Last action: {0}'}"
                FontAttributes="Bold" />
@@ -16,14 +16,14 @@
             <Label Text="Long press this card" TextColor="White" />
 
             <cm:NativeContextMenus.ContextMenu>
-                <cm:NativeContextMenu Title="Card">
-                    <cm:MenuNode Title="Copy" Icon="doc.on.doc" Command="{Binding RunCommand}" CommandParameter="Copy" />
-                    <cm:MenuNode Title="Share" Icon="square.and.arrow.up" Command="{Binding RunCommand}" CommandParameter="Share" />
+                <cm:NativeContextMenu x:Name="CardMenu" Title="Card">
+                    <cm:MenuNode Title="Copy" SystemIcon="Copy" Command="{Binding RunCommand}" CommandParameter="Copy" />
+                    <cm:MenuNode Title="Share" SystemIcon="Share" Command="{Binding RunCommand}" CommandParameter="Share" />
 
                     <!-- Children and no Title: an inline section with dividers -->
                     <cm:MenuNode>
                         <cm:MenuNode Title="Favorite" IsCheckable="True" IsChecked="{Binding IsFavorite, Mode=TwoWay}" />
-                        <cm:MenuNode Title="Sort By" Icon="arrow.up.arrow.down">
+                        <cm:MenuNode Title="Sort By" SystemIcon="Sort">
                             <cm:MenuNode Title="Name" GroupKey="sort" IsCheckable="True" IsChecked="True" Command="{Binding RunCommand}" CommandParameter="Sort by name" />
                             <cm:MenuNode Title="Date" GroupKey="sort" IsCheckable="True" Command="{Binding RunCommand}" CommandParameter="Sort by date" />
                             <cm:MenuNode Title="Size" GroupKey="sort" IsCheckable="True" Command="{Binding RunCommand}" CommandParameter="Sort by size" />
@@ -31,15 +31,32 @@
                     </cm:MenuNode>
 
                     <cm:MenuNode Title="Locked" IsEnabled="False" />
-                    <cm:MenuNode Title="Delete" Icon="trash" Destructive="True" Command="{Binding RunCommand}" CommandParameter="Delete" />
+                    <cm:MenuNode Title="Delete" SystemIcon="Delete" Destructive="True" Command="{Binding RunCommand}" CommandParameter="Delete" />
                 </cm:NativeContextMenu>
             </cm:NativeContextMenus.ContextMenu>
         </Border>
 
         <Label Grid.Row="2" Text="{Binding IsFavorite, StringFormat='Favorite: {0}'}" />
 
+        <Grid Grid.Row="3" ColumnDefinitions="*,*" ColumnSpacing="12">
+            <!-- Trigger="Tap": the menu opens on a tap -->
+            <Border Padding="16" StrokeShape="RoundRectangle 12" BackgroundColor="#2B0B98">
+                <Label Text="Tap this card" TextColor="White" />
+
+                <cm:NativeContextMenus.ContextMenu>
+                    <cm:NativeContextMenu Trigger="Tap">
+                        <cm:MenuNode Title="Open" SystemIcon="Open" Command="{Binding RunCommand}" CommandParameter="Open" />
+                        <cm:MenuNode Title="Archive" SystemIcon="Archive" Command="{Binding RunCommand}" CommandParameter="Archive" />
+                    </cm:NativeContextMenu>
+                </cm:NativeContextMenus.ContextMenu>
+            </Border>
+
+            <!-- Show opens a menu from code -->
+            <Button Grid.Column="1" Text="Open card menu" Clicked="OnOpenCardMenuClicked" />
+        </Grid>
+
         <!-- A menu on each list item: the command comes from the page view model, the parameter is the item -->
-        <CollectionView Grid.Row="3" ItemsSource="{Binding Machines}">
+        <CollectionView Grid.Row="4" ItemsSource="{Binding Machines}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Grid Padding="12">
@@ -48,11 +65,11 @@
                         <cm:NativeContextMenus.ContextMenu>
                             <cm:NativeContextMenu>
                                 <cm:MenuNode Title="Rename"
-                                             Icon="pencil"
+                                             SystemIcon="Edit"
                                              Command="{Binding RenameCommand, Source={RelativeSource AncestorType={x:Type local:ContextMenuViewModel}}}"
                                              CommandParameter="{Binding .}" />
                                 <cm:MenuNode Title="Remove"
-                                             Icon="trash"
+                                             SystemIcon="Delete"
                                              Destructive="True"
                                              Command="{Binding RemoveCommand, Source={RelativeSource AncestorType={x:Type local:ContextMenuViewModel}}}"
                                              CommandParameter="{Binding .}" />
