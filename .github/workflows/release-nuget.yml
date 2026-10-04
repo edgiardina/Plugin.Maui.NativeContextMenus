@@ -47,4 +47,4 @@ jobs:
         with:
           user: Richthofen # The nuget.org profile name that owns the trusted publishing policy
       - name: Push
-        run: dotnet nuget push src\Plugin.Maui.NativeContextMenusin\Release\Plugin.Maui.NativeContextMenus.${{ steps.get_version.outputs.version-without-v }}.nupkg -s https://api.nuget.org/v3/index.json -k ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push src\Plugin.Maui.NativeContextMenus\bin\Release\Plugin.Maui.NativeContextMenus.${{ steps.get_version.outputs.version-without-v }}.nupkg -s https://api.nuget.org/v3/index.json -k ${{ steps.login.outputs.NUGET_API_KEY }}
