@@ -47,6 +47,12 @@
                     <cm:NativeContextMenu Trigger="Tap">
                         <cm:MenuNode Title="Open" SystemIcon="Open" Command="{Binding RunCommand}" CommandParameter="Open" />
                         <cm:MenuNode Title="Archive" SystemIcon="Archive" Command="{Binding RunCommand}" CommandParameter="Archive" />
+                        <!-- Icon takes an image of your own, for example a glyph from a font -->
+                        <cm:MenuNode Title="Star" Command="{Binding RunCommand}" CommandParameter="Star">
+                            <cm:MenuNode.Icon>
+                                <FontImageSource Glyph="&#x2605;" />
+                            </cm:MenuNode.Icon>
+                        </cm:MenuNode>
                     </cm:NativeContextMenu>
                 </cm:NativeContextMenus.ContextMenu>
             </Border>

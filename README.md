@@ -10,10 +10,10 @@
 
 These screenshots show the sample app. The same XAML makes the menus on the two platforms.
 
-|         | Menu with sections | Submenu with a radio group | Menu on a list item |
-| ------- | ------------------ | -------------------------- | ------------------- |
-| iOS     | ![An iOS context menu with sections, a check mark, and a submenu](docs/images/ios-menu.png) | ![An iOS submenu with a radio group](docs/images/ios-submenu.png) | ![An iOS context menu on a list item](docs/images/ios-list-item.png) |
-| Android | ![An Android context menu with sections, a check box, and a submenu](docs/images/android-menu.png) | ![An Android submenu with a radio group](docs/images/android-submenu.png) | ![An Android context menu on a list item](docs/images/android-list-item.png) |
+|         | Menu with sections | Submenu with a radio group | Menu on a list item | Menu on a tap |
+| ------- | ------------------ | -------------------------- | ------------------- | ------------- |
+| iOS     | ![An iOS context menu with sections and a submenu](docs/images/ios-menu.png) | ![An iOS submenu with a radio group](docs/images/ios-submenu.png) | ![An iOS context menu on a list item](docs/images/ios-list-item.png) | ![An iOS menu that opens on a tap](docs/images/ios-tap.png) |
+| Android | ![An Android context menu with sections and a submenu](docs/images/android-menu.png) | ![An Android submenu with a radio group](docs/images/android-submenu.png) | ![An Android context menu on a list item](docs/images/android-list-item.png) | ![An Android menu that opens on a tap](docs/images/android-tap.png) |
 
 ## Supported Platforms
 
@@ -190,11 +190,13 @@ The plugin builds the native menu each time the menu opens. As a result, the men
 
 | Property     | iOS and Mac Catalyst                          | Android                                        |
 | ------------ | --------------------------------------------- | ---------------------------------------------- |
-| `SystemIcon` | The SF Symbol for the value.                  | No icon.                                       |
+| `SystemIcon` | The SF Symbol for the value.                  | The Material Symbols icon for the value. The package includes these icons. |
 | `SymbolName` | The SF Symbol with that name.                 | No icon.                                       |
-| `Icon`       | `FileImageSource` (an image in the app bundle) or `FontImageSource`. | `FileImageSource` only (a drawable resource, which includes `MauiImage` files). Shown on API 29 or later. |
+| `Icon`       | `FileImageSource` (an image in the app bundle) or `FontImageSource`. | `FileImageSource` (a drawable resource, which includes `MauiImage` files) or `FontImageSource`. |
 
-Android does not have system icons for menus. To show an icon on Android, set `Icon` to an image in your app.
+To use an icon of your own, set `Icon`. It has priority over `SystemIcon` on all platforms. To show no icon, do not set an icon property.
+
+Android shows menu icons on API 29 or later.
 
 ## Known Limits
 
@@ -214,3 +216,5 @@ The [sample app](samples/) has a page for the view context menu and a page for t
 ## License
 
 MIT. Refer to [LICENSE](LICENSE).
+
+The Android icons are from [Material Symbols](https://github.com/google/material-design-icons) (Apache License 2.0). Refer to [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

@@ -1,8 +1,14 @@
 using System.Runtime.CompilerServices;
 using Android.Content;
+using Android.Graphics;
 using Android.Graphics.Drawables;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.Platform;
+using AColor = Android.Graphics.Color;
+using APaint = Android.Graphics.Paint;
 using AView = Android.Views.View;
 
 namespace Plugin.Maui.NativeContextMenus;
@@ -62,7 +68,7 @@ public static partial class NativeContextMenus
             return false;
 
         // The menu is built each time it opens, so it always shows the current node state
-        var builder = new PopupBuilder(context);
+        var builder = new PopupBuilder(context, element.Handler?.MauiContext);
         builder.AddNodes(root, menu.Items);
 
         if (OperatingSystem.IsAndroidVersionAtLeast(28))
@@ -93,7 +99,7 @@ public static partial class NativeContextMenus
             v is not null && element.TryGetTarget(out var target) && ShowPopup(v, target);
     }
 
-    sealed class PopupBuilder(Context context)
+    sealed class PopupBuilder(Context context, IMauiContext? mauiContext)
     {
         int lastItemId;
         int lastGroupId;
@@ -141,7 +147,7 @@ public static partial class NativeContextMenus
                     continue;
 
                 item.SetEnabled(node.IsEnabled);
-                if (ToDrawable(node.Icon) is { } icon)
+                if (ToDrawable(node) is { } icon)
                     item.SetIcon(icon);
 
                 group.Add((item, node));
@@ -162,15 +168,51 @@ public static partial class NativeContextMenus
                     item.SetChecked(true);
         }
 
-        // Only drawable resources (which include MauiImage files) are supported
-        Drawable? ToDrawable(ImageSource? source)
+        // Icon has priority. If it gives no image, the bundled drawable for SystemIcon is used.
+        Drawable? ToDrawable(MenuNode node)
         {
-            if (source is not FileImageSource { File: { Length: > 0 } file })
+            var drawable = node.Icon switch
+            {
+                FileImageSource { File: { Length: > 0 } file } => GetDrawable(
+                    context.Resources?.GetIdentifier(System.IO.Path.GetFileNameWithoutExtension(file).ToLowerInvariant(), "drawable", context.PackageName) ?? 0),
+                FontImageSource { Glyph: { Length: > 0 } } font when mauiContext is not null => RenderGlyph(font, mauiContext),
+                _ => null,
+            };
+
+            return drawable ?? GetDrawable(SystemIconDrawables.Id(node.SystemIcon));
+        }
+
+        Drawable? GetDrawable(int id) => id == 0 ? null : context.GetDrawable(id);
+
+        // Menu icons are 24dp. With no color set, the glyph gets the icon color of the theme.
+        Drawable? RenderGlyph(FontImageSource source, IMauiContext mauiContext)
+        {
+            using var paint = new APaint(PaintFlags.AntiAlias)
+            {
+                TextSize = TypedValue.ApplyDimension(ComplexUnitType.Dip, 24, context.Resources?.DisplayMetrics),
+                Color = source.Color?.ToPlatform() ?? ThemeIconColor(),
+            };
+            paint.SetTypeface(mauiContext.Services.GetRequiredService<IFontManager>()
+                .GetTypeface(Microsoft.Maui.Font.OfSize(source.FontFamily, source.Size)));
+
+            var width = (int)Math.Ceiling(paint.MeasureText(source.Glyph));
+            var height = (int)Math.Ceiling(paint.Descent() - paint.Ascent());
+            if (width <= 0 || height <= 0)
                 return null;
 
-            var name = System.IO.Path.GetFileNameWithoutExtension(file).ToLowerInvariant();
-            var id = context.Resources?.GetIdentifier(name, "drawable", context.PackageName) ?? 0;
-            return id == 0 ? null : context.GetDrawable(id);
+            var bitmap = Bitmap.CreateBitmap(width, height, Bitmap.Config.Argb8888!);
+            using var canvas = new Canvas(bitmap);
+            canvas.DrawText(source.Glyph, 0, -paint.Ascent(), paint);
+            return new BitmapDrawable(context.Resources, bitmap);
+        }
+
+        AColor ThemeIconColor()
+        {
+            using var value = new TypedValue();
+            if (context.Theme?.ResolveAttribute(Android.Resource.Attribute.ColorControlNormal, value, true) != true)
+                return AColor.Gray;
+
+            return value.ResourceId != 0 ? new AColor(context.GetColor(value.ResourceId)) : new AColor(value.Data);
         }
     }
 }

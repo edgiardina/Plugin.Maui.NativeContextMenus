@@ -2,7 +2,7 @@ namespace Plugin.Maui.NativeContextMenus;
 
 /// <summary>
 /// A system icon for a <see cref="MenuNode"/>. iOS and Mac Catalyst show the SF Symbol for the value.
-/// Android does not have system icons for menus, thus it shows no icon.
+/// Android shows a Material Symbols icon that the package includes.
 /// </summary>
 public enum SystemIcon
 {
