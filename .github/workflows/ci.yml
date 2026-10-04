@@ -29,3 +29,13 @@ jobs:
 
     - name: Build
       run: dotnet build src\Plugin.Maui.NativeContextMenus.sln -c Release
+
+    # Makes sure that the package builds. The release workflow does the real pack on a version tag.
+    - name: Pack
+      run: dotnet pack src\Plugin.Maui.NativeContextMenus.sln -c Release --no-build -p:PackageVersion=0.0.0-ci.${{ github.run_number }} -o artifacts
+
+    - name: Upload package
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-package
+        path: artifacts/*.nupkg
