@@ -57,19 +57,21 @@ public static partial class NativeContextMenus
             ShowPopup(view, element);
     }
 
-    static bool ShowPopup(AView anchor, VisualElement element)
+    static bool ShowPopup(AView anchor, VisualElement element) =>
+        GetContextMenu(element) is { } menu && ShowPopup(anchor, menu, element.Handler?.MauiContext);
+
+    internal static bool ShowPopup(AView anchor, IMenuHost host, IMauiContext? mauiContext, GravityFlags gravity = GravityFlags.NoGravity)
     {
-        if (anchor.Context is not { } context ||
-            GetContextMenu(element) is not { HasVisibleItems: true } menu)
+        if (anchor.Context is not { } context || !host.Roots.Any(n => n.IsVisible))
             return false;
 
-        var popup = new PopupMenu(context, anchor);
+        var popup = new PopupMenu(context, anchor, gravity);
         if (popup.Menu is not { } root)
             return false;
 
         // The menu is built each time it opens, so it always shows the current node state
-        var builder = new PopupBuilder(context, element.Handler?.MauiContext);
-        builder.AddNodes(root, menu.Items);
+        var builder = new PopupBuilder(context, mauiContext);
+        builder.AddNodes(root, host.Roots);
 
         if (OperatingSystem.IsAndroidVersionAtLeast(28))
             root.SetGroupDividerEnabled(true);
@@ -79,7 +81,7 @@ public static partial class NativeContextMenus
         popup.MenuItemClick += (_, e) =>
         {
             if (e.Item is { } item && builder.Leaves.TryGetValue(item.ItemId, out var node))
-                menu.Activate(node);
+                host.Activate(node);
         };
 
         popup.Show();

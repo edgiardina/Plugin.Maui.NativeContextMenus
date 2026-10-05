@@ -40,6 +40,31 @@ static class MenuTree
     }
 
     /// <summary>
+    /// Changes the check state for a tap on <paramref name="node"/>, then runs its Command and raises Tapped.
+    /// </summary>
+    public static void Activate(IEnumerable<MenuNode> roots, MenuNode node)
+    {
+        if (node.IsCheckable)
+        {
+            if (string.IsNullOrEmpty(node.GroupKey))
+            {
+                node.IsChecked = !node.IsChecked;
+            }
+            else
+            {
+                foreach (var other in Descendants(roots))
+                    if (other.IsCheckable && other.GroupKey == node.GroupKey)
+                        other.IsChecked = other == node;
+            }
+        }
+
+        if (node.Command?.CanExecute(node.CommandParameter) == true)
+            node.Command.Execute(node.CommandParameter);
+
+        node.RaiseTapped();
+    }
+
+    /// <summary>
     /// True when all nodes are checkable leaves that share one GroupKey.
     /// </summary>
     public static bool IsRadioGroup(IReadOnlyCollection<MenuNode> nodes) =>

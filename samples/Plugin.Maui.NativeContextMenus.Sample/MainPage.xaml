@@ -8,9 +8,8 @@
     <ContentPage.ToolbarItems>
 
         <!-- Inline XAML Menu Example -->
-        <local:NativeContextMenuToolbarItem Text="Actions"
-                                            Command="{Binding HandleMenuCommand}">
-            
+        <local:NativeContextMenuToolbarItem Text="Actions">
+
             <!-- Simple refresh action -->
             <local:MenuNode Title="Refresh" Command="{Binding RefreshCommand}" />
             
@@ -34,9 +33,8 @@
         
         <!-- MVVM Binding Menu Example -->
         <local:NativeContextMenuToolbarItem Text="Filters"
-                                           ItemsSource="{Binding MenuItems}"
-                                           Command="{Binding ApplyFilterCommand}" />
-        
+                                           ItemsSource="{Binding MenuItems}" />
+
     </ContentPage.ToolbarItems>
 
     <ScrollView Padding="20">
@@ -90,19 +88,15 @@
                     <Label Text="• Try the radio groups (View Mode, Sort By, Filters)" />
                     <Label Text="• Notice instant-apply behavior - no 'Apply' button needed" />
                     <Label Text="• Watch the status updates when you interact with menus" />
-                    <Label Text="• On iOS 13/Android without menu support, Command is used as fallback" />
                 </StackLayout>
             </Frame>
-            
+
             <!-- Platform Notes -->
             <Frame BackgroundColor="LightCoral" Padding="15">
                 <StackLayout Spacing="10">
                     <Label Text="Platform Notes" FontAttributes="Bold" />
-                    <Label Text="• iOS 14+: Full UIMenu support with checkmarks" />
-                    <Label Text="• iOS 13: Falls back to Command property (first action behavior)" />
-                    <Label Text="• Android: Toolbar overflow menu with SubMenu support" />
-                    <Label Text="• macOS: Same as iOS with UIMenu" />
-                    <Label Text="• Command property: Used as fallback when menu can't be shown" />
+                    <Label Text="• iOS and Mac Catalyst: the UIMenu of the bar button" />
+                    <Label Text="• Android: a PopupMenu anchored to the toolbar button" />
                 </StackLayout>
             </Frame>
             

@@ -205,9 +205,50 @@ Android shows menu icons on API 29 or later.
 - On iOS, the plugin adds a clear button to the platform view. The button gets touches only when `Trigger` is `Tap`.
 - The menu of a parent view does not open from a child view that handles touch input itself (for example a `Button`).
 
-## Toolbar Menus (experimental)
+## Toolbar Menus
 
-`NativeContextMenuToolbarItem` puts a `MenuNode` menu on a toolbar item. This part of the plugin is not complete. Refer to [TOOLBAR_MENU_USAGE.md](src/Plugin.Maui.NativeContextMenus/TOOLBAR_MENU_USAGE.md).
+`NativeContextMenuToolbarItem` is a `ToolbarItem` that opens a native menu on a tap. Add `MenuNode` items to it the same as for a context menu.
+
+```xml
+<ContentPage.ToolbarItems>
+    <cm:NativeContextMenuToolbarItem Text="Filter">
+        <cm:MenuNode Title="Sort By">
+            <cm:MenuNode Title="Name" GroupKey="sort" IsCheckable="True" IsChecked="True"
+                         Command="{Binding SortCommand}" CommandParameter="Name" />
+            <cm:MenuNode Title="Date" GroupKey="sort" IsCheckable="True"
+                         Command="{Binding SortCommand}" CommandParameter="Date" />
+        </cm:MenuNode>
+
+        <cm:MenuNode Title="Show Favorites" IsCheckable="True" IsChecked="{Binding ShowFavorites, Mode=TwoWay}" />
+    </cm:NativeContextMenuToolbarItem>
+</ContentPage.ToolbarItems>
+```
+
+The toolbar item does not need a registration call or platform code. The nodes get the `BindingContext` of the page.
+
+| Platform             | Native control                                |
+| -------------------- | --------------------------------------------- |
+| iOS and Mac Catalyst | The `UIMenu` of the bar button                |
+| Android              | A `PopupMenu` anchored to the toolbar button  |
+
+### NativeContextMenuToolbarItem
+
+The item has all the members of `ToolbarItem` (`Text`, `IconImageSource`, `IsEnabled`, and more) and these members:
+
+| Member        | Description                                                                          |
+| ------------- | ------------------------------------------------------------------------------------ |
+| `Items`       | The top-level `MenuNode` items. This is the XAML content property.                   |
+| `ItemsSource` | Nodes that you make in code. When you set it, the menu shows these nodes and not `Items`. |
+| `ItemTapped`  | Event. Occurs after the user taps a leaf node and its command runs.                  |
+
+The plugin builds the native menu each time the menu opens. As a result, the menu always shows the current property values.
+
+### Toolbar menu limits
+
+- Do not use the `Command` property or the `Clicked` event of the toolbar item. Use the commands of the nodes.
+- Use the default `Order`. An item with `Order="Secondary"` is in the overflow menu, and its menu opens at the end of the toolbar.
+- On Android, the plugin finds the toolbar button by its `Text`. Give each toolbar item a different `Text`.
+- On iOS and Mac Catalyst, the plugin finds the bar button by its `AutomationId`. If the item has no `AutomationId`, the plugin sets one.
 
 ## Sample App
 
