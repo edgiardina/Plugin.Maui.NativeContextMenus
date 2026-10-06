@@ -17,11 +17,7 @@ public static class MauiAppBuilderExtensions
 	public static MauiAppBuilder UseNativeContextMenus(this MauiAppBuilder builder)
 	{
 		builder.Services.AddSingleton<INativeContextMenus, NativeContextMenusImplementation>();
-		
-		// For iOS automatic injection, developers can call the injector manually
-		// For Android, developers should use AndroidMenuHelper.InjectToolbarMenuItems()
-		// in their Activity's OnCreateOptionsMenu method
-		
+
 		return builder;
 	}
 }

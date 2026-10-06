@@ -7,7 +7,7 @@ namespace Plugin.Maui.NativeContextMenus;
 /// iOS and Mac Catalyst show a UIContextMenuInteraction menu. Android shows a PopupMenu on long press.
 /// </summary>
 [ContentProperty(nameof(Items))]
-public class NativeContextMenu : Element
+public class NativeContextMenu : Element, IMenuHost
 {
     // Optional header text (iOS and Mac Catalyst only)
     public static readonly BindableProperty TitleProperty =
@@ -53,29 +53,11 @@ public class NativeContextMenu : Element
 
     internal bool HasVisibleItems => Items.Any(n => n.IsVisible);
 
-    /// <summary>
-    /// Called by the platform code when the user taps a leaf node.
-    /// </summary>
-    internal void Activate(MenuNode node)
+    IEnumerable<MenuNode> IMenuHost.Roots => Items;
+
+    void IMenuHost.Activate(MenuNode node)
     {
-        if (node.IsCheckable)
-        {
-            if (string.IsNullOrEmpty(node.GroupKey))
-            {
-                node.IsChecked = !node.IsChecked;
-            }
-            else
-            {
-                foreach (var other in MenuTree.Descendants(Items))
-                    if (other.IsCheckable && other.GroupKey == node.GroupKey)
-                        other.IsChecked = other == node;
-            }
-        }
-
-        if (node.Command?.CanExecute(node.CommandParameter) == true)
-            node.Command.Execute(node.CommandParameter);
-
-        node.RaiseTapped();
+        MenuTree.Activate(Items, node);
         ItemTapped?.Invoke(this, node);
     }
 }

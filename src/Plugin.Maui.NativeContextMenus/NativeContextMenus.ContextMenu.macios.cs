@@ -47,7 +47,7 @@ public static partial class NativeContextMenus
     // The elements are built each time the menu opens, so the menu always shows the current node state
     static UIMenuElement[] BuildElements(WeakReference<VisualElement> element) =>
         element.TryGetTarget(out var target) && GetContextMenu(target) is { HasVisibleItems: true } menu
-            ? BuildElements(menu.Items, menu, target.Handler?.MauiContext)
+            ? BuildElements(menu, target.Handler?.MauiContext)
             : [];
 
     static string GetTitle(WeakReference<VisualElement> element) =>
@@ -87,7 +87,7 @@ public static partial class NativeContextMenus
         }
     }
 
-    sealed class MenuButton : UIButton
+    internal sealed class MenuButton : UIButton
     {
         public bool IgnoresTouches { get; set; }
 
@@ -109,10 +109,13 @@ public static partial class NativeContextMenus
         }
     }
 
-    static UIMenuElement[] BuildElements(IEnumerable<MenuNode> nodes, NativeContextMenu owner, IMauiContext? mauiContext) =>
+    internal static UIMenuElement[] BuildElements(IMenuHost owner, IMauiContext? mauiContext) =>
+        BuildElements(owner.Roots, owner, mauiContext);
+
+    static UIMenuElement[] BuildElements(IEnumerable<MenuNode> nodes, IMenuHost owner, IMauiContext? mauiContext) =>
         nodes.Where(n => n.IsVisible).Select(n => BuildElement(n, owner, mauiContext)).ToArray();
 
-    static UIMenuElement BuildElement(MenuNode node, NativeContextMenu owner, IMauiContext? mauiContext)
+    static UIMenuElement BuildElement(MenuNode node, IMenuHost owner, IMauiContext? mauiContext)
     {
         var title = node.Title ?? string.Empty;
         var image = ToUIImage(node, mauiContext);
