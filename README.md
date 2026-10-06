@@ -2,9 +2,18 @@
 
 [![NuGet](https://img.shields.io/nuget/v/Plugin.Maui.NativeContextMenus.svg)](https://www.nuget.org/packages/Plugin.Maui.NativeContextMenus/)
 
-`Plugin.Maui.NativeContextMenus` adds native context menus to views in a .NET MAUI app.
+`Plugin.Maui.NativeContextMenus` adds native menus to views and to toolbar items in a .NET MAUI app.
 
 .NET MAUI has a context menu (`FlyoutBase.ContextFlyout`) only on Windows and Mac Catalyst. This plugin gives the same function on iOS and Android.
+
+## Menu Types
+
+The plugin has two types of menu. The two types use the same `MenuNode` items.
+
+| Type              | Where the menu opens                        | How to add it                                    | Section                                    |
+| ----------------- | ------------------------------------------- | ------------------------------------------------ | ------------------------------------------ |
+| View context menu | On a view, on a long press or a tap         | The `NativeContextMenus.ContextMenu` property    | [View Context Menus](#view-context-menus)  |
+| Toolbar menu      | On a toolbar button of the page, on a tap   | A `NativeContextMenuToolbarItem` in `ToolbarItems` | [Toolbar Menus](#toolbar-menus)          |
 
 ## Screenshots
 
@@ -38,12 +47,12 @@ The package has assemblies for .NET 9 and .NET 10.
 ## Installation
 
 ```xml
-<PackageReference Include="Plugin.Maui.NativeContextMenus" Version="1.0.0" />
+<PackageReference Include="Plugin.Maui.NativeContextMenus" Version="1.1.0" />
 ```
 
-The context menu does not need a registration call in `MauiProgram.cs`.
+The menus do not need a registration call in `MauiProgram.cs`.
 
-## Usage
+## View Context Menus
 
 Add the XML namespace to the page:
 
