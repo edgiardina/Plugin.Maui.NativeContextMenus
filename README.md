@@ -47,7 +47,7 @@ The package has assemblies for .NET 9 and .NET 10.
 ## Installation
 
 ```xml
-<PackageReference Include="Plugin.Maui.NativeContextMenus" Version="1.1.0" />
+<PackageReference Include="Plugin.Maui.NativeContextMenus" Version="1.2.0" />
 ```
 
 The menus do not need a registration call in `MauiProgram.cs`.

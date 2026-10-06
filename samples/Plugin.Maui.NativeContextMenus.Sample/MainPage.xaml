@@ -19,6 +19,20 @@
                 <local:MenuNode Title="Grid" Value="Grid" />
                 <local:MenuNode Title="Card" Value="Card" />
             </local:MenuNode>
+
+            <!-- Radio group for an enum property. Value is text, and the view model gets the enum value. -->
+            <local:MenuNode Title="Density" SelectedValue="{Binding Density}">
+                <local:MenuNode Title="Compact" Value="Compact" />
+                <local:MenuNode Title="Regular" Value="Regular" />
+                <local:MenuNode Title="Large" Value="Large" />
+            </local:MenuNode>
+
+            <!-- Radio group for an int property -->
+            <local:MenuNode Title="Page Size" SelectedValue="{Binding PageSize}">
+                <local:MenuNode Title="25" Value="25" />
+                <local:MenuNode Title="50" Value="50" />
+                <local:MenuNode Title="100" Value="100" />
+            </local:MenuNode>
             
             <!-- Simple action -->
             <local:MenuNode Title="Add Item" Command="{Binding AddItemCommand}" />
@@ -62,7 +76,7 @@
             <Frame BackgroundColor="LightGreen" Padding="15">
                 <StackLayout Spacing="10">
                     <Label Text="Current Settings" FontAttributes="Bold" />
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="5">
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="5">
                         
                         <Label Grid.Row="0" Grid.Column="0" Text="View Mode:" FontAttributes="Bold" />
                         <Label Grid.Row="0" Grid.Column="1" Text="{Binding CurrentViewMode}" />
@@ -72,6 +86,12 @@
                         
                         <Label Grid.Row="2" Grid.Column="0" Text="Item Count:" FontAttributes="Bold" />
                         <Label Grid.Row="2" Grid.Column="1" Text="{Binding ItemCount}" />
+
+                        <Label Grid.Row="3" Grid.Column="0" Text="Density:" FontAttributes="Bold" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="{Binding Density}" />
+
+                        <Label Grid.Row="4" Grid.Column="0" Text="Page Size:" FontAttributes="Bold" />
+                        <Label Grid.Row="4" Grid.Column="1" Text="{Binding PageSize}" />
                         
                     </Grid>
                 </StackLayout>

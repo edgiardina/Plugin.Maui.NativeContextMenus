@@ -12,6 +12,8 @@ public class MainPageViewModel : INotifyPropertyChanged
     private string _currentSortMode = "Name";
     private int _itemCount = 10;
     private string _statusText = "Ready";
+    private Density _density = Density.Regular;
+    private int _pageSize = 50;
 
     public MainPageViewModel()
     {
@@ -57,6 +59,18 @@ public class MainPageViewModel : INotifyPropertyChanged
     }
 
     public bool HasItems => ItemCount > 0;
+
+    public Density Density
+    {
+        get => _density;
+        set => SetProperty(ref _density, value);
+    }
+
+    public int PageSize
+    {
+        get => _pageSize;
+        set => SetProperty(ref _pageSize, value);
+    }
 
     public string StatusText
     {
@@ -225,4 +239,11 @@ public class MainPageViewModel : INotifyPropertyChanged
     }
 
     #endregion
+}
+
+public enum Density
+{
+    Compact,
+    Regular,
+    Large,
 }
