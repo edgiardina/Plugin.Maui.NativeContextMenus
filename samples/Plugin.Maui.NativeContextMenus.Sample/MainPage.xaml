@@ -13,21 +13,19 @@
             <!-- Simple refresh action -->
             <local:MenuNode Title="Refresh" Command="{Binding RefreshCommand}" />
             
-            <!-- View mode radio group -->
-            <local:MenuNode Title="View Mode">
-                <local:MenuNode Title="List" GroupKey="view" IsCheckable="True" IsChecked="True" 
-                               Command="{Binding SetViewCommand}" CommandParameter="List" />
-                <local:MenuNode Title="Grid" GroupKey="view" IsCheckable="True" 
-                               Command="{Binding SetViewCommand}" CommandParameter="Grid" />
-                <local:MenuNode Title="Card" GroupKey="view" IsCheckable="True" 
-                               Command="{Binding SetViewCommand}" CommandParameter="Card" />
+            <!-- View mode radio group. SelectedValue holds the Value of the checked item. -->
+            <local:MenuNode Title="View Mode" SelectedValue="{Binding CurrentViewMode}">
+                <local:MenuNode Title="List" Value="List" />
+                <local:MenuNode Title="Grid" Value="Grid" />
+                <local:MenuNode Title="Card" Value="Card" />
             </local:MenuNode>
             
             <!-- Simple action -->
             <local:MenuNode Title="Add Item" Command="{Binding AddItemCommand}" />
             
-            <!-- Destructive action -->
-            <local:MenuNode Title="Clear All" Destructive="True" Command="{Binding ClearCommand}" />
+            <!-- Destructive action. It shows only when there are items. -->
+            <local:MenuNode Title="Clear All" Destructive="True" Command="{Binding ClearCommand}"
+                           IsVisible="{Binding HasItems}" />
             
         </local:NativeContextMenuToolbarItem>
         

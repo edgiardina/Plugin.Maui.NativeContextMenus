@@ -181,6 +181,8 @@ Set the property to `null` to remove the menu.
 | `IsCheckable`      | `true` gives the item a check mark state.                                               |
 | `IsChecked`        | The check mark state. A tap changes this value before the command runs.                 |
 | `GroupKey`         | Checkable items with the same key are a radio group. A tap on one item clears the others. |
+| `SelectedValue`    | The `Value` of the checked child. Refer to [Radio groups with a binding](#radio-groups-with-a-binding). |
+| `Value`            | The value of the item in the radio group of its parent.                                 |
 | `KeepMenuOpen`     | `true` keeps the menu open after a tap. iOS and Mac Catalyst only.                      |
 | `Children`         | Child items. This is the XAML content property.                                         |
 | `Tapped`           | Event. Occurs after the user taps the item.                                             |
@@ -188,6 +190,36 @@ Set the property to `null` to remove the menu.
 A node with `Children` and a `Title` is a submenu. A node with `Children` and no `Title` is an inline section.
 
 The plugin builds the native menu each time the menu opens. As a result, the menu always shows the current property values.
+
+### Radio groups with a binding
+
+Set `SelectedValue` on a node and `Value` on its children. The children that have a `Value` are a radio group. The child with a `Value` equal to `SelectedValue` has the check mark.
+
+```xml
+<cm:MenuNode Title="Sort By" SelectedValue="{Binding SortMode}">
+    <cm:MenuNode Title="Name" Value="Name" />
+    <cm:MenuNode Title="Date" Value="Date" />
+</cm:MenuNode>
+```
+
+A tap on a child sets `SelectedValue` to the `Value` of that child. The binding is two-way, thus the view model gets the new value. If the view model changes the value, the menu shows the new selection the next time it opens.
+
+`SelectedValue` can be a string, a number, or an enum. The plugin compares the text of the two values, thus `Value="Date"` is equal to an enum value `Date`, and `Value="50"` is equal to the number 50. When `SelectedValue` has a value, the plugin changes the `Value` of the tapped child to the same type.
+
+For a radio group with no submenu, use a node with no `Title`. That node is an inline section.
+
+Do not set `IsCheckable`, `IsChecked`, or `GroupKey` on a child that has a `Value`. The plugin sets them.
+
+### Bindings for the menu state
+
+The plugin builds the native menu each time the menu opens. Thus a binding on `IsVisible`, `IsEnabled`, `Title`, or `IsChecked` controls what the menu shows.
+
+```xml
+<cm:MenuNode Title="Clear All" Command="{Binding ClearCommand}" IsVisible="{Binding HasItems}" />
+<cm:MenuNode Title="Show Favorites" IsCheckable="True" IsChecked="{Binding ShowFavorites}" />
+```
+
+A binding on `IsChecked` and on `SelectedValue` is two-way by default.
 
 ### Icons
 

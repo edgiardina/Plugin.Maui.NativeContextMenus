@@ -49,8 +49,14 @@ public class MainPageViewModel : INotifyPropertyChanged
     public int ItemCount
     {
         get => _itemCount;
-        set => SetProperty(ref _itemCount, value);
+        set
+        {
+            if (SetProperty(ref _itemCount, value))
+                OnPropertyChanged(nameof(HasItems));
+        }
     }
+
+    public bool HasItems => ItemCount > 0;
 
     public string StatusText
     {
