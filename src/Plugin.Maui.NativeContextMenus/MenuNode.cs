@@ -109,7 +109,7 @@ namespace Plugin.Maui.NativeContextMenus
 
         // Checked state (used with IsCheckable)
         public static readonly BindableProperty IsCheckedProperty =
-            BindableProperty.Create(nameof(IsChecked), typeof(bool), typeof(MenuNode), false);
+            BindableProperty.Create(nameof(IsChecked), typeof(bool), typeof(MenuNode), false, BindingMode.TwoWay);
 
         public bool IsChecked
         {
@@ -125,6 +125,28 @@ namespace Plugin.Maui.NativeContextMenus
         {
             get => (string?)GetValue(GroupKeyProperty);
             set => SetValue(GroupKeyProperty, value);
+        }
+
+        // The value of this node in a radio group. The parent node holds the selection in SelectedValue.
+        public static readonly BindableProperty ValueProperty =
+            BindableProperty.Create(nameof(Value), typeof(object), typeof(MenuNode), default(object),
+                propertyChanged: (bindable, _, _) => (((MenuNode)bindable).Parent as MenuNode)?.SyncSelection());
+
+        public object? Value
+        {
+            get => GetValue(ValueProperty);
+            set => SetValue(ValueProperty, value);
+        }
+
+        // The Value of the checked child. The children that have a Value are a radio group.
+        public static readonly BindableProperty SelectedValueProperty =
+            BindableProperty.Create(nameof(SelectedValue), typeof(object), typeof(MenuNode), default(object), BindingMode.TwoWay,
+                propertyChanged: (bindable, _, _) => ((MenuNode)bindable).SyncSelection());
+
+        public object? SelectedValue
+        {
+            get => GetValue(SelectedValueProperty);
+            set => SetValue(SelectedValueProperty, value);
         }
 
         // Command executed when this node is tapped (before ItemTappedCommand on owner)
@@ -155,7 +177,27 @@ namespace Plugin.Maui.NativeContextMenus
         public MenuNode()
         {
             // Children are logical children so BindingContext and RelativeSource bindings reach them
-            Children.CollectionChanged += (_, e) => MenuTree.SyncLogicalChildren(this, Children, e);
+            Children.CollectionChanged += (_, e) =>
+            {
+                MenuTree.SyncLogicalChildren(this, Children, e);
+                SyncSelection();
+            };
+        }
+
+        string? selectionGroupKey;
+
+        // Sets the check state of the children that have a Value. The platform code reads only the check state.
+        void SyncSelection()
+        {
+            foreach (var child in Children)
+            {
+                if (child.Value is null)
+                    continue;
+
+                child.IsCheckable = true;
+                child.GroupKey = selectionGroupKey ??= $"SelectedValue:{Guid.NewGuid():N}";
+                child.IsChecked = MenuTree.ValuesEqual(child.Value, SelectedValue);
+            }
         }
 
         internal bool IsSection => Children.Count > 0 && string.IsNullOrEmpty(Title);
